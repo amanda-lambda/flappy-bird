@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import Sprite
 
+
 class Base(Sprite):
     """
     Ground sprite, which is a game obstacle.

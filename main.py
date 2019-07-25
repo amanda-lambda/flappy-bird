@@ -10,7 +10,7 @@ from pipe import Pipe
 from base import Base
 from score import Score
 
-
+# TODO: Get rid of magic numbers
 class Game():
     """
     The game entry point.

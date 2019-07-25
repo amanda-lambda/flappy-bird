@@ -5,8 +5,6 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 
 # TODO: Easy, medium, hard settings for pipes, make it based off of bird height
-# TODO: Collision with pipes
-# TODO: pipes not populating
 
 class Pipe(Sprite):
     """

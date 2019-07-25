@@ -62,7 +62,7 @@ class Bird(Sprite):
 
     # Check if collided with anything
     def check_collide(self, sprite):
-        pygame.sprite.collide_mask(self, sprite)
+        return pygame.sprite.collide_mask(self, sprite)
 
     # Draw sprite to game display
     def draw(self):
