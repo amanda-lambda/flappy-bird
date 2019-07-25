@@ -4,6 +4,10 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import Sprite
 
+# TODO: Easy, medium, hard settings for pipes, make it based off of bird height
+# TODO: Collision with pipes
+# TODO: pipes not populating
+
 class Pipe(Sprite):
     """
     Pipe sprite which are game obstacles.
@@ -20,7 +24,7 @@ class Pipe(Sprite):
         pipe = pygame.image.load('assets/pipe.png').convert_alpha()
 
         # Randomly generate pipe pair
-        midpoint = random.randrange(int(0.45*self.screen_height), int(0.7*self.screen_height))
+        midpoint = random.randrange(int(0.5*self.screen_height), int(0.65*self.screen_height))
         upper = midpoint - pipe.get_height() - self.gap/2
         lower = midpoint + self.gap/2
         self.y = upper

@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import Sprite
 
+#Todo: customizable sprites
+
 class Bird(Sprite):
     """
     Bird sprite, controlled by the player.

@@ -75,8 +75,8 @@ class Game():
 
     def main_loop(self):
         # Add two pipes to the screen
+        self.pipes.append(Pipe(self.width*1.5))
         self.pipes.append(Pipe(self.width*2))
-        self.pipes.append(Pipe(self.width*2.5))
 
         # Start the game
         i = 1
@@ -93,7 +93,7 @@ class Game():
             # Check to see if the player bird had any collisions with the pipes
             collide_pipe = any([self.player.check_collide(pipe) for pipe in self.pipes])
             collide_base = self.player.check_collide(self.base)
-            print(collide_pipe, collide_base)
+            # print(collide_pipe, collide_base)
             if collide_pipe or collide_base:
                 print("DONE")
                 return
@@ -115,17 +115,16 @@ class Game():
             for pipe in self.pipes:
                 pipe.update() 
             # Add pipe when pipe has almost shifted off screen
-            if self.pipes[0].x == 0:
-                print("Pipe has moved off screen")
+            if self.pipes[0].x < 0 and len(self.pipes) < 3:
                 self.pipes.append(Pipe(self.width+50))
-                print("Adding a new pipe at ", self.width+50)
             # Remove pipe that has shifted left off screen
             if self.pipes[0].x < -self.pipes[0].image.get_width():
                 self.pipes.pop(0)
 
             # Draw sprites
             self.screen.blit(self.bg, (0,0))
-            [pipe.draw() for pipe in self.pipes]
+            for pipe in self.pipes:
+                pipe.draw()
             self.base.draw()
             self.player.draw()
             self.score.draw()
