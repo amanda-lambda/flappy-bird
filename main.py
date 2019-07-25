@@ -10,50 +10,65 @@ from pipe import Pipe
 from base import Base
 from score import Score
 
-# TODO: Get rid of magic numbers
+# Import utility functions
+from utils import *
+
+
+# TODO: Background as separate sprite
+# TODO: Drawing utility
 class Game():
-    """
-    The game entry point.
-    Handles initialization, graphics, and main loops.
-    """
 
     def __init__(self, width=288, height=512):
-        """Initialize the game.
-        Args:
+        """
+        Initialize the game.
+
+        Argument:
             width (int): width of game screen in pixels
             height (int): height of game screen in pixels
         """
         pygame.init()
+
+        # Frame rate of the game
         self.fps = 30
-        self.width, self.height = width, height
+
+        # Game clock which ticks according to the game framerate
         self.clock = pygame.time.Clock()
+
+        # Set up display
+        self.width, self.height = width, height
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Flappy Bird')
 
-        # Load in sprites
+        # Set up game objects
         self.bg = pygame.image.load('assets/background.png').convert_alpha()
         self.msg = pygame.image.load('assets/start_msg.png').convert_alpha()
+        self.end_msg = pygame.image.load('assets/end_msg.png').convert_alpha()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = []
         self.score = Score()
+        # Start with two pipes off screen
+        self.pipes = [Pipe(self.width*1.5), Pipe(self.width*2)] 
 
-    # Start the game (show welcome screen)
+        # List of flags indicating whether or not the pass through of the pipe 
+        # pairs has been counted yet
+        self.pipe_counted = [False, False]
+
+
     def welcome_loop(self):
-        """Start the game (show welcome screen)"""
-        # A counter for the number of frames which have elapsed so far
-        i = 1
+        """
+        Show the welcome screen.
+        """
         while True:
-            # This loop listens for events (input from user). If the user presses the 
-            # space bar, exit from the welcome_loop and begin the game.
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                if event.type == KEYDOWN and event.key == K_SPACE:
-                    return
+            # This loop listens for events (input from user). If the user 
+            # presses the space bar, exit the welcome_loop and begin the game.
+            if listen_spacebar():
+                return
 
-            # Update sprites
+            # Update player sprite, which should be oscillating up and down
+            # and flappying its wings periodically
             self.player.update()
+
+            # Update the base sprite, which should be scrolling past.
             self.base.update()
 
             # Draw sprites on screen
@@ -61,44 +76,44 @@ class Game():
             self.screen.blit(self.msg, (0,0))
             self.base.draw()
             self.player.draw()
+
+            # Update the full display srface to the game screen
             pygame.display.flip()
             
             # Increment the clock
             self.clock.tick(self.fps)
-            i += 1
+
 
     def main_loop(self):
-        # Add two pipes to the screen
-        self.pipes.append(Pipe(self.width*1.5))
-        self.pipes.append(Pipe(self.width*2))
+        """
+        The main game loop. 
 
+        The user tries to accrue as many points as possible by passing the bird
+        sprite through the pipe pairs. Bird movement is controlled using the 
+        space bar. The game ends when the bird hits an obstacle (a pipe pair or 
+        the ground).
+        """
         # Tell bird sprite the game has started. It will stop oscillating.
         self.player.set_game_play_mode(True)
 
         # Start the game
-        i = 1
         while True:
-            # Check for key presses (user input). Set key_press to be true when 
-            # the space bar is pressed
-            key_press = False
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                if event.type == KEYDOWN and event.key == K_SPACE:
-                    key_press = True
 
-            # Check to see if the player bird had any collisions with the pipes
-            collide_pipe = any([self.player.check_collide(pipe) for pipe in self.pipes])
-            collide_base = self.player.check_collide(self.base)
-            # print(collide_pipe, collide_base)
-            if collide_pipe or collide_base:
-                print("DONE")
+            # Check for key presses (user input). 
+            key_press = listen_spacebar()
+
+            # Check to see if the player bird has collided with any of the pipe
+            # pairs or the base. If so, exit the game loop.
+            obstacles = self.pipes + [self.base]
+            if self.player.check_collide(obstacles):
                 return
 
             # If the player passes through a pipe, add +1 to score
-            for pipe in self.pipes:
-                if pipe.x == self.player.x:
-                    self.score.update() 
+            for i in range(len(self.pipes)):
+                if not self.pipe_counted[i]:
+                    if self.pipes[i].x < self.player.x:
+                        self.score.update() 
+                        self.pipe_counted[i] = True
 
             # Update base sprite
             self.base.update()
@@ -109,12 +124,16 @@ class Game():
             # Update pipes
             for pipe in self.pipes:
                 pipe.update() 
-            # Add pipe when pipe has almost shifted off screen
+
+            # Add a new pipe when one of the pipes has shifted off screen
             if self.pipes[0].x < 0 and len(self.pipes) < 3:
                 self.pipes.append(Pipe(self.width+50))
+                self.pipe_counted.append(False)
+
             # Remove pipe that has shifted left off screen
             if self.pipes[0].x < -self.pipes[0].image.get_width():
                 self.pipes.pop(0)
+                self.pipe_counted.pop(0)
 
             # Draw sprites
             self.screen.blit(self.bg, (0,0))
@@ -123,18 +142,23 @@ class Game():
             self.base.draw()
             self.player.draw()
             self.score.draw()
+
+            # Update the entire game display
             pygame.display.flip()
 
             # Increment
             self.clock.tick(self.fps)
-            i += 1
 
     def game_over(self):
-        self.screen.blit(self.bg, (0,0))
-        [pipe.draw() for pipe in self.pipes]
-        self.base.draw()
-        self.player.draw()
-        self.score.draw()
+        while True:
+            self.screen.blit(self.bg, (0,0))
+            [pipe.draw() for pipe in self.pipes]
+            self.base.draw()
+            self.player.draw()
+            self.score.draw()
+            self.screen.blit(self.end_msg, (0,0))
+
+            pygame.display.flip()
 
 # Script entry point
 if __name__ == '__main__':

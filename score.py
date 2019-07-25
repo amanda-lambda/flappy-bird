@@ -1,7 +1,7 @@
 import pygame
 from pygame.sprite import Sprite
 
-# TODO: Check, should score be popping up at game end?
+
 class Score(Sprite):
 
     def __init__(self):
@@ -44,5 +44,3 @@ class Score(Sprite):
         for i in score_digits:
             self.screen.blit(self.digits[i], (x, self.y))
             x += self.digits[i].get_width()
-
-        # print(self.value, score_digits, score_width, x, "*********")

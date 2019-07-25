@@ -151,12 +151,19 @@ class Bird(Sprite):
         The bird can collide with the pipes or the ground.
 
         Arguments:
-            sprite (pygame.sprite): A sprite instance
+            sprite (pygame.sprite or list): A sprite instance or a list of 
+                sprite instances. All must have the rect property.
 
         Returns:
             bool: True if collision with sprite instance, False otherwise
         """
-        return pygame.sprite.collide_mask(self, sprite)
+        if isinstance(sprite, list):
+            for s in sprite:
+                if pygame.sprite.collide_mask(self, s):
+                    return True
+            return False
+        else: 
+            return pygame.sprite.collide_mask(self, sprite)
 
 
     def draw(self):
@@ -173,6 +180,7 @@ class Bird(Sprite):
             is_playing (bool): whether or not we are in game play mode
         """
         self.game_play = is_playing
+        
 
     @property
     def rect(self):
