@@ -14,8 +14,6 @@ from score import Score
 from utils import *
 
 
-# TODO: Background as separate sprite
-# TODO: Drawing utility
 class Game():
 
     def __init__(self, width=288, height=512):
@@ -54,6 +52,37 @@ class Game():
         self.pipe_counted = [False, False]
 
 
+    def update_display(self, mode):
+        """
+        Update the game display with the game background and sprites. 
+
+        In the 'welcome' mode, we should additionally display the welcome text. 
+        In the 'end' mode, we should display the game over text.
+
+        Arguments:
+            mode (str): Can be one of [welcome, main, game_over]
+        """
+        # Draw the background
+        self.screen.blit(self.bg, (0,0))
+
+        # Draw the sprites
+        for pipe in self.pipes:
+            pipe.draw()
+        self.base.draw()
+        self.player.draw()
+        self.score.draw()
+
+        # Draw any messages
+        if mode == 'welcome':
+            self.screen.blit(self.msg, (0,0))
+        if mode == 'game_over':
+            self.screen.blit(self.end_msg, 
+                ((self.width - self.end_msg.get_width()) / 2, 0.3*self.height))
+
+        # Update the entire game display
+        pygame.display.flip()
+
+
     def welcome_loop(self):
         """
         Show the welcome screen.
@@ -71,14 +100,8 @@ class Game():
             # Update the base sprite, which should be scrolling past.
             self.base.update()
 
-            # Draw sprites on screen
-            self.screen.blit(self.bg, (0,0))
-            self.screen.blit(self.msg, (0,0))
-            self.base.draw()
-            self.player.draw()
-
-            # Update the full display srface to the game screen
-            pygame.display.flip()
+            # Update the display
+            self.update_display('welcome')
             
             # Increment the clock
             self.clock.tick(self.fps)
@@ -135,30 +158,23 @@ class Game():
                 self.pipes.pop(0)
                 self.pipe_counted.pop(0)
 
-            # Draw sprites
-            self.screen.blit(self.bg, (0,0))
-            for pipe in self.pipes:
-                pipe.draw()
-            self.base.draw()
-            self.player.draw()
-            self.score.draw()
-
-            # Update the entire game display
-            pygame.display.flip()
+            # Update the game display
+            self.update_display('main')
 
             # Increment
             self.clock.tick(self.fps)
 
-    def game_over(self):
-        while True:
-            self.screen.blit(self.bg, (0,0))
-            [pipe.draw() for pipe in self.pipes]
-            self.base.draw()
-            self.player.draw()
-            self.score.draw()
-            self.screen.blit(self.end_msg, (0,0))
 
-            pygame.display.flip()
+    def game_over(self):
+        """
+        The game over loop
+        """
+        while True:
+            if listen_quit():
+                return
+            self.update_display('game_over')
+
+
 
 # Script entry point
 if __name__ == '__main__':

@@ -1,8 +1,7 @@
 import pygame
-from pygame.sprite import Sprite
 
 
-class Score(Sprite):
+class Score():
 
     def __init__(self):
         """
