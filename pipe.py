@@ -7,41 +7,63 @@ from pygame.sprite import Sprite
 # TODO: Easy, medium, hard settings for pipes, make it based off of bird height
 
 class Pipe(Sprite):
-    """
-    Pipe sprite which are game obstacles.
-    (Top and bottom pair)
-    """
-    # Initialize pipe (randomly generated)
-    def __init__(self, x):
+
+    def __init__(self, x_init):
+        """
+        Initialize a new pipe pair sprite instance. 
+        The pipe placement on the y-axis is randomly generated.
+
+        Arguments:
+            x_init (int): x-coordinate of starting position 
+        """
+        # Game screen
         self.screen = pygame.display.get_surface()
-        self.screen_height = self.screen.get_height()
+        screen_height = self.screen.get_height()
+
+        # Pipe position 
+        self.x = x_init
+
+        # Size of gap between pipes (in pixels)
         self.gap = 100 
-        self.x = x
 
         # Sprite images
-        pipe = pygame.image.load('assets/pipe.png').convert_alpha()
+        pipe_lower = pygame.image.load('assets/pipe.png').convert_alpha()
+        pipe_upper = pygame.transform.rotate(pipe_lower, 180)
+        pipe_width = pipe_lower.get_width()
+        pipe_height = pipe_lower.get_height()
 
-        # Randomly generate pipe pair
-        midpoint = random.randrange(int(0.5*self.screen_height), int(0.65*self.screen_height))
-        upper = midpoint - pipe.get_height() - self.gap/2
-        lower = midpoint + self.gap/2
-        self.y = upper
+        # Randomly generate coordinates for upper and lwer pipe
+        midpoint = random.randrange(int(0.5*screen_height), 
+                                    int(0.65*screen_height))
+        y_upper = midpoint - pipe_height - self.gap/2
+        y_lower = midpoint + self.gap/2
+        self.y = y_upper
 
         # Create surface and mask
-        self.image = pygame.Surface((pipe.get_width(), self.screen_height)).convert_alpha()
+        self.image = pygame.Surface((pipe_width, screen_height)).convert_alpha()
         self.image.fill((0, 0, 0, 0))
-        self.image.blit(pipe, (0, lower))
-        self.image.blit(pygame.transform.rotate(pipe, 180), (0, upper))
+        self.image.blit(pipe_lower, (0, y_lower))
+        self.image.blit(pipe_upper, (0, y_upper))
         self.mask = pygame.mask.from_surface(self.image)
 
-    # Update pipe position (continually shift 4 pixels left)
+
     def update(self):
+        """
+        Update the pipe pair's x-position by continually shifting 4 pixels to
+        the left.
+        """
         self.x -= 4
 
-    # Draw sprite to game display
+
     def draw(self):
+        """
+        Draw the sprite to the game display.
+        """
         self.screen.blit(self.image, (self.x, self.y))
 
     @property
     def rect(self):
+        """
+        This property is needed for pygame.sprite.collide_mask
+        """
         return Rect(self.x, self.y, self.image.get_width(), self.image.get_height())

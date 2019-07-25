@@ -33,7 +33,7 @@ class Game():
         # Load in sprites
         self.bg = pygame.image.load('assets/background.png').convert_alpha()
         self.msg = pygame.image.load('assets/start_msg.png').convert_alpha()
-        self.player = Bird()
+        self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
         self.pipes = []
         self.score = Score()
@@ -52,14 +52,8 @@ class Game():
                 if event.type == KEYDOWN and event.key == K_SPACE:
                     return
 
-            # Every 5 frames, update the player bird by changing the wing flap
-            if i % 5 == 0:
-                self.player.change_flap_state()
-
-            # Every frame, have the player bird oscillate up and down.
-            self.player.oscillate()
-
-            # Every frame, update the base 
+            # Update sprites
+            self.player.update()
             self.base.update()
 
             # Draw sprites on screen
@@ -77,6 +71,9 @@ class Game():
         # Add two pipes to the screen
         self.pipes.append(Pipe(self.width*1.5))
         self.pipes.append(Pipe(self.width*2))
+
+        # Tell bird sprite the game has started. It will stop oscillating.
+        self.player.set_game_play_mode(True)
 
         # Start the game
         i = 1
@@ -107,8 +104,6 @@ class Game():
             self.base.update()
 
             # Update player sprite
-            if i % 3 == 0:
-                self.player.change_flap_state()
             self.player.update(key_press)
 
             # Update pipes
