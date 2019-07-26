@@ -16,10 +16,11 @@ Note that other versions of the below packages/libraries may work, I'm just list
 - pygame 1.9.3
 
 ## See the game in action!
-As an extra little bonus, I added Easy/Medium/Hard level of the game (by adjusting the gaps between the pipes).
+As an extra little bonus, I added Easy/Medium/Hard levels of the game (by adjusting the gaps between the pipes).
 
 ![Demo](demo/example.gif)
 
 ## Credit
 Thanks to sourabhv for the sprite images!
+
 https://github.com/sourabhv/FlappyBirdClone
