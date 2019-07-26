@@ -51,6 +51,9 @@ class Game():
         # pairs has been counted yet
         self.pipe_counted = [False, False]
 
+        # Set game difficulty as easy, medium, or hard
+        self.difficulty = 'medium'
+
 
     def update_display(self, mode):
         """
@@ -70,7 +73,8 @@ class Game():
             pipe.draw()
         self.base.draw()
         self.player.draw()
-        self.score.draw()
+        if mode != 'welcome':
+            self.score.draw()
 
         # Draw any messages
         if mode == 'welcome':
