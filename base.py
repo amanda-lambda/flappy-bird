@@ -5,7 +5,6 @@ from pygame.sprite import Sprite
 
 class Base(Sprite):
   
-    # Initialize base
     def __init__(self):
         """
         Initialize the ground sprite.

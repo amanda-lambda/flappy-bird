@@ -8,11 +8,12 @@ from pygame.sprite import Sprite
 from bird import Bird
 from pipe import Pipe
 from base import Base
-from score import Score
+from game_text import GameText
 
 # Import utility functions
 from utils import *
 
+# TODO: File headers/docstrings
 
 class Game():
 
@@ -39,11 +40,9 @@ class Game():
 
         # Set up game objects
         self.bg = pygame.image.load('assets/background.png').convert_alpha()
-        self.msg = pygame.image.load('assets/start_msg.png').convert_alpha()
-        self.end_msg = pygame.image.load('assets/end_msg.png').convert_alpha()
+        self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.score = Score()
         # Start with two pipes off screen
         self.pipes = [Pipe(self.width*1.5), Pipe(self.width*2)] 
 
@@ -53,6 +52,7 @@ class Game():
 
         # Set game difficulty as easy, medium, or hard
         self.difficulty = 'medium'
+
 
 
     def update_display(self, mode):
@@ -73,15 +73,9 @@ class Game():
             pipe.draw()
         self.base.draw()
         self.player.draw()
-        if mode != 'welcome':
-            self.score.draw()
 
         # Draw any messages
-        if mode == 'welcome':
-            self.screen.blit(self.msg, (0,0))
-        if mode == 'game_over':
-            self.screen.blit(self.end_msg, 
-                ((self.width - self.end_msg.get_width()) / 2, 0.3*self.height))
+        self.game_text.draw(mode)
 
         # Update the entire game display
         pygame.display.flip()
@@ -94,8 +88,12 @@ class Game():
         while True:
             # This loop listens for events (input from user). If the user 
             # presses the space bar, exit the welcome_loop and begin the game.
-            if listen_spacebar():
+            keys_pressed = listen()
+            if 'spacebar' in keys_pressed:
                 return
+            if 'left_arrow' or 'right_arrow' in keys_pressed:
+                level = self.game_text.update_level(keys_pressed)
+                print("Selected level:", level)
 
             # Update player sprite, which should be oscillating up and down
             # and flappying its wings periodically
@@ -127,7 +125,10 @@ class Game():
         while True:
 
             # Check for key presses (user input). 
-            key_press = listen_spacebar()
+            spacebar_press = False
+            keys_pressed = listen()
+            if 'spacebar' in keys_pressed:
+                spacebar_press = True
 
             # Check to see if the player bird has collided with any of the pipe
             # pairs or the base. If so, exit the game loop.
@@ -139,14 +140,14 @@ class Game():
             for i in range(len(self.pipes)):
                 if not self.pipe_counted[i]:
                     if self.pipes[i].x < self.player.x:
-                        self.score.update() 
+                        self.game_text.update_score() 
                         self.pipe_counted[i] = True
 
             # Update base sprite
             self.base.update()
 
             # Update player sprite
-            self.player.update(key_press)
+            self.player.update(spacebar_press)
 
             # Update pipes
             for pipe in self.pipes:
@@ -171,11 +172,10 @@ class Game():
 
     def game_over(self):
         """
-        The game over loop
+        The game over loop.
+        Display the player's final score and the "Game Over" message.
         """
         while True:
-            if listen_quit():
-                return
             self.update_display('game_over')
 
 

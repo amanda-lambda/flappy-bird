@@ -4,7 +4,6 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import Sprite
 
-# TODO: Easy, medium, hard settings for pipes, make it based off of bird height
 
 class Pipe(Sprite):
 
