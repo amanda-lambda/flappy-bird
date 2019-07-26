@@ -15,9 +15,9 @@ Note that other versions of the below packages/libraries may work, I'm just list
 - Python 3.6.4
 - pygame 1.9.3
 
-## Some extra things I added
-- Easy/Medium/Hard level of the games (by adjusting the gaps between the pipes) 
-Here's an example of the game in action:
+## See the game in action!
+As an extra little bonus, I added Easy/Medium/Hard level of the game (by adjusting the gaps between the pipes).
+
 ![Demo](demo/example.gif)
 
 ## Credit
