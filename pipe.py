@@ -7,30 +7,30 @@ from pygame.sprite import Sprite
 
 class Pipe(Sprite):
 
-    def __init__(self, x_init, difficulty='medium'):
+    def __init__(self, x_init, difficulty):
         """
         Initialize a new pipe pair sprite instance. 
         The pipe placement on the y-axis is randomly generated.
 
         Arguments:
             x_init (int): x-coordinate of starting position 
-            difficulty (str): either 'easy', 'medium', or 'hard'. Will determine
-                the size of the gaps between pipes.
+            difficulty (int): either 'easy', 'medium', or 'hard' = [0,1,2]. 
+                Will determine the size of the gaps between pipes.
         """
-        # Game screen
-        self.screen = pygame.display.get_surface()
-        screen_height = self.screen.get_height()
+        # Game surface
+        self.surface = pygame.display.get_surface()
+        screen_height = self.surface.get_height()
 
         # Pipe position 
         self.x = x_init
 
         # Size of gap between pipes (in pixels)
-        if difficulty == 'easy':
-            self.gap = 135
-        elif difficulty == 'medium':
+        if difficulty == 0:
+            self.gap = 125
+        elif difficulty == 1:
             self.gap = 100
-        elif difficulty == 'hard':
-            self.gap = 65
+        elif difficulty == 2:
+            self.gap = 75
 
         # Sprite images
         pipe_lower = pygame.image.load('assets/pipe.png').convert_alpha()
@@ -65,7 +65,7 @@ class Pipe(Sprite):
         """
         Draw the sprite to the game display.
         """
-        self.screen.blit(self.image, (self.x, self.y))
+        self.surface.blit(self.image, (self.x, self.y))
 
     @property
     def rect(self):

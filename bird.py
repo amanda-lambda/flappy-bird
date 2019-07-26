@@ -13,8 +13,8 @@ class Bird(Sprite):
             x_init (int): x-coordinate of starting position 
             y_init (int): y-coordinate of starting position
         """
-        # Game screen
-        self.screen = pygame.display.get_surface() 
+        # Game surface
+        self.surface = pygame.display.get_surface() 
 
         # Game frame counter
         self.count = 0
@@ -169,7 +169,7 @@ class Bird(Sprite):
     def draw(self):
         """Draw the sprite onto the game display."""
         rotated_image = pygame.transform.rotate(self.image, self.angle)
-        self.screen.blit(rotated_image, (self.x, self.y))
+        self.surface.blit(rotated_image, (self.x, self.y))
 
 
     def set_game_play_mode(self, is_playing):

@@ -13,7 +13,6 @@ from game_text import GameText
 # Import utility functions
 from utils import *
 
-# TODO: File headers/docstrings
 
 class Game():
 
@@ -43,15 +42,14 @@ class Game():
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        # Start with two pipes off screen
-        self.pipes = [Pipe(self.width*1.5), Pipe(self.width*2)] 
+        self.pipes = []
 
         # List of flags indicating whether or not the pass through of the pipe 
         # pairs has been counted yet
         self.pipe_counted = [False, False]
 
-        # Set game difficulty as easy, medium, or hard
-        self.difficulty = 'medium'
+        # Set game difficulty as [0,1,2] = [easy, medium, or hard]
+        self.level = 2
 
 
 
@@ -92,8 +90,7 @@ class Game():
             if 'spacebar' in keys_pressed:
                 return
             if 'left_arrow' or 'right_arrow' in keys_pressed:
-                level = self.game_text.update_level(keys_pressed)
-                print("Selected level:", level)
+                self.level = self.game_text.update_level(keys_pressed)
 
             # Update player sprite, which should be oscillating up and down
             # and flappying its wings periodically
@@ -120,6 +117,9 @@ class Game():
         """
         # Tell bird sprite the game has started. It will stop oscillating.
         self.player.set_game_play_mode(True)
+
+        # Start with two pipes off screen
+        self.pipes = [Pipe(self.width*1.5, self.level), Pipe(self.width*2, self.level)] 
 
         # Start the game
         while True:
@@ -155,7 +155,7 @@ class Game():
 
             # Add a new pipe when one of the pipes has shifted off screen
             if self.pipes[0].x < 0 and len(self.pipes) < 3:
-                self.pipes.append(Pipe(self.width+50))
+                self.pipes.append(Pipe(self.width+50, self.level))
                 self.pipe_counted.append(False)
 
             # Remove pipe that has shifted left off screen
@@ -176,6 +176,7 @@ class Game():
         Display the player's final score and the "Game Over" message.
         """
         while True:
+            listen()
             self.update_display('game_over')
 
 

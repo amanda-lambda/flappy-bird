@@ -8,8 +8,8 @@ class GameText():
         Initialize a new text instance. 
         This handles any global game text, game scores, as well as menu text.
         """
-        # Game screen
-        self.screen = pygame.display.get_surface() 
+        # Game surface
+        self.surface = pygame.display.get_surface() 
 
         # Sprites
         self.msg_start = pygame.image.load('assets/start_msg.png').convert_alpha()
@@ -18,20 +18,26 @@ class GameText():
         for i in range(10):
             self.digits.append(pygame.image.load('assets/%i.png' % i).convert_alpha())
 
-        # Locations of sprites
-        self.x_msg_end = (self.screen.get_width() - self.msg_end.get_width()) / 2
-        self.y_msg_end = 0.3 * self.screen.get_height()
+        # Location of game_over message
+        self.x_msg_end = (self.surface.get_width() - self.msg_end.get_width()) / 2
+        self.y_msg_end = 0.3 * self.surface.get_height()
 
+        # Location of level selection digits. We want them to be evently spaced
+        # apart
         digit_gap = 50
-        self.x_level_1 = (self.screen.get_width() - self.digits[0].get_width()) / 2
-        self.x_level_0 = self.x_level_1 - digit_gap - self.digits[1].get_width()
-        self.x_level_2 = self.x_level_1 + digit_gap + self.digits[1].get_width()
-        self.y_level = 0.7 * self.screen.get_height()
+        x_level_1 = (self.surface.get_width() - self.digits[0].get_width()) / 2
+        x_level_0 = x_level_1 - digit_gap - self.digits[1].get_width()
+        x_level_2 = x_level_1 + digit_gap + self.digits[1].get_width()
+        self.x_level = [x_level_0, x_level_1, x_level_2]
+        self.y_level = 0.7 * self.surface.get_height()
 
-        self.y_score = self.screen.get_height()*0.1
+        # The location of the score
+        self.y_score = self.surface.get_height()*0.1
 
         # The currently selected level
-        self.selected_level = 1
+        self.level = 1
+        self.level_box_height = self.digits[0].get_height() + 10
+        self.level_box_width = self.digits[0].get_width() + 10
 
         # Score value
         self.score = 0
@@ -49,10 +55,15 @@ class GameText():
         """
         # In welcome mode, display the start instructions
         if mode == 'welcome':
-            self.screen.blit(self.msg_start, (0,0))
-            self.screen.blit(self.digits[0], (self.x_level_0, self.y_level))
-            self.screen.blit(self.digits[1], (self.x_level_1, self.y_level))
-            self.screen.blit(self.digits[2], (self.x_level_2, self.y_level))
+            # Blit the welcome message
+            self.surface.blit(self.msg_start, (0, 0))
+            # Blit the green box highlighting the selected level
+            pygame.draw.rect(self.surface, (0, 0, 0), 
+                (self.x_level[self.level]-5, self.y_level-5, self.level_box_width, self.level_box_height), 5)
+            # Blit the levels
+            self.surface.blit(self.digits[0], (self.x_level[0], self.y_level))
+            self.surface.blit(self.digits[1], (self.x_level[1], self.y_level))
+            self.surface.blit(self.digits[2], (self.x_level[2], self.y_level))
 
         # In main mode, display the score
         if mode == 'main':
@@ -60,7 +71,7 @@ class GameText():
 
         # In game_over mode, display the end text and score
         if mode == 'game_over':
-            self.screen.blit(self.msg_end, (self.x_msg_end, self.y_msg_end))
+            self.surface.blit(self.msg_end, (self.x_msg_end, self.y_msg_end))
             self.draw_score()
 
 
@@ -75,9 +86,9 @@ class GameText():
         score_width = sum([self.digits[i].get_width() for i in score_digits])
 
         # Blit the score digits onto the screen
-        x = (self.screen.get_width() - score_width) / 2
+        x = (self.surface.get_width() - score_width) / 2
         for i in score_digits:
-            self.screen.blit(self.digits[i], (x, self.y_score))
+            self.surface.blit(self.digits[i], (x, self.y_score))
             x += self.digits[i].get_width()
 
 
@@ -93,16 +104,16 @@ class GameText():
             ['easy', 'medium', 'hard'], respectively.
         """
         if 'right_arrow' in keys_pressed:
-            if self.selected_level == 2:
-                return self.selected_level
-            self.selected_level += 1
+            if self.level == 2:
+                return self.level
+            self.level += 1
 
         if 'left_arrow' in keys_pressed:
-            if self.selected_level == 0:
-                return self.selected_level
-            self.selected_level -= 1
+            if self.level == 0:
+                return self.level
+            self.level -= 1
 
-        return self.selected_level
+        return self.level
 
 
     def update_score(self):

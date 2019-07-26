@@ -9,8 +9,8 @@ class Base(Sprite):
         """
         Initialize the ground sprite.
         """
-        # Game screen
-        self.screen = pygame.display.get_surface() 
+        # Game surface
+        self.surface = pygame.display.get_surface() 
 
         # Sprite and mask
         self.image = pygame.image.load('assets/base.png').convert_alpha()
@@ -18,8 +18,8 @@ class Base(Sprite):
         
         # Position 
         self.x = 0
-        self.y = self.screen.get_height() - self.image.get_height()
-        self.max_shift = self.image.get_width() - self.screen.get_width()
+        self.y = self.surface.get_height() - self.image.get_height()
+        self.max_shift = self.image.get_width() - self.surface.get_width()
 
 
     def update(self):
@@ -34,7 +34,7 @@ class Base(Sprite):
         """
         Draw the sprite to the game display.
         """
-        self.screen.blit(self.image, (self.x, self.y))
+        self.surface.blit(self.image, (self.x, self.y))
 
     @property
     def rect(self):
