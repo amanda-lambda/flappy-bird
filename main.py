@@ -1,8 +1,11 @@
+import cv2
 import random
+import numpy as np
 
 import pygame
 from pygame.locals import *
 from pygame.sprite import Sprite
+from pygame.surfarray import array2d
 
 # Import sprites
 from bird import Bird
@@ -18,7 +21,8 @@ class Game():
 
     def __init__(self, width=288, height=512):
         """
-        Initialize the game.
+        Initialize the game. 
+        A minimal version for use training deep reinforcement learning methods. 
 
         Argument:
             width (int): width of game screen in pixels
@@ -37,153 +41,133 @@ class Game():
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Flappy Bird')
 
+        # Set game difficulty as [0,1,2] = [easy, medium, or hard]
+        self.level = 2
+
         # Set up game objects
         self.bg = pygame.image.load('assets/background.png').convert_alpha()
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = []
+        self.pipes = [Pipe(self.width, self.level), Pipe(self.width*1.5, self.level)] 
 
         # List of flags indicating whether or not the pass through of the pipe 
         # pairs has been counted yet
         self.pipe_counted = [False, False]
 
-        # Set game difficulty as [0,1,2] = [easy, medium, or hard]
-        self.level = 2
+        # Tell bird sprite the game has started.
+        self.player.set_game_play_mode(True)
 
 
-
-    def update_display(self, mode):
+    def update_display(self, mode='drl'):
         """
         Update the game display with the game background and sprites. 
 
-        In the 'welcome' mode, we should additionally display the welcome text. 
-        In the 'end' mode, we should display the game over text.
-
-        Arguments:
-            mode (str): Can be one of [welcome, main, game_over]
+        Args:
+            mode (str): One of ['drl' or 'game']. If 'dqn', then we would like to render a simplistic version. If 'game', then we would like to render the full version.
         """
         # Draw the background
-        self.screen.blit(self.bg, (0,0))
+        if mode == 'game':
+            self.screen.blit(self.bg, (0,0))
 
         # Draw the sprites
         for pipe in self.pipes:
             pipe.draw()
-        self.base.draw()
         self.player.draw()
+        # if mode == 'game':
+        self.base.draw()
 
         # Draw any messages
-        self.game_text.draw(mode)
+        if mode == 'game':
+            self.game_text.draw('main')
 
         # Update the entire game display
         pygame.display.flip()
 
 
-    def welcome_loop(self):
+    def process_frame_drl(self):
         """
-        Show the welcome screen.
+        Process and clean the frame so we can input into the DRL function.
+
+        Returns:
+            (tensor): 84x84x4 tensor 
         """
-        while True:
-            # This loop listens for events (input from user). If the user 
-            # presses the space bar, exit the welcome_loop and begin the game.
-            keys_pressed = listen()
-            if 'spacebar' in keys_pressed:
-                return
-            if 'left_arrow' or 'right_arrow' in keys_pressed:
-                self.level = self.game_text.update_level(keys_pressed)
+        # Import game screen array
+        state = np.array(array2d(self.screen), dtype='uint8')
 
-            # Update player sprite, which should be oscillating up and down
-            # and flappying its wings periodically
-            self.player.update()
+        # Crop out where the base would be
+        state = state[:,:400]
 
-            # Update the base sprite, which should be scrolling past.
-            self.base.update()
+        # Resize to 84x 84
+        state = cv2.resize(state, (84, 84))
 
-            # Update the display
-            self.update_display('welcome')
-            
-            # Increment the clock
-            self.clock.tick(self.fps)
+        # Convert to black and white
+        state[state > 0] = 1
+
+        # Convert torch tensor 
+        return state
 
 
-    def main_loop(self):
+    def step(self, action, num_frames):
         """
-        The main game loop. 
+        Advances the game by one frame. 
 
-        The user tries to accrue as many points as possible by passing the bird
-        sprite through the pipe pairs. Bird movement is controlled using the 
-        space bar. The game ends when the bird hits an obstacle (a pipe pair or 
+        The bird tries to accrue as many points as possible by passing through the pipe pairs. The agent can either flap its wings or do nothing. The game ends when the bird hits an obstacle (a pipe pair or 
         the ground).
+
+        Arguments:
+            action (bool): If True, the bird flaps its wings once. If False, the bird does nothing.
+            num_frames (int): The number of frames to advance while repeating the action
+
+        Returns:
+            next_state
+            reward
+            done
         """
-        # Tell bird sprite the game has started. It will stop oscillating.
-        self.player.set_game_play_mode(True)
+        reward = 0.1 
+        done = False
 
-        # Start with two pipes off screen
-        self.pipes = [Pipe(self.width*1.5, self.level), Pipe(self.width*2, self.level)] 
+        # Check to see if the player bird has collided with any of the pipe
+        # pairs or the base. If so, exit the game loop.
+        obstacles = self.pipes + [self.base]
+        if self.player.check_collide(obstacles):
+            reward = -1
+            done = False
 
-        # Start the game
-        while True:
+        # If the player passes through a pipe, add +1 to score
+        for i in range(len(self.pipes)):
+            if not self.pipe_counted[i]:
+                if self.pipes[i].x < self.player.x:
+                    self.game_text.update_score() 
+                    self.pipe_counted[i] = True
+                    reward = 1
 
-            # Check for key presses (user input). 
-            spacebar_press = False
-            keys_pressed = listen()
-            if 'spacebar' in keys_pressed:
-                spacebar_press = True
+        # Update base sprite
+        self.base.update()
 
-            # Check to see if the player bird has collided with any of the pipe
-            # pairs or the base. If so, exit the game loop.
-            obstacles = self.pipes + [self.base]
-            if self.player.check_collide(obstacles):
-                return
+        # Update player sprite
+        self.player.update(action)
 
-            # If the player passes through a pipe, add +1 to score
-            for i in range(len(self.pipes)):
-                if not self.pipe_counted[i]:
-                    if self.pipes[i].x < self.player.x:
-                        self.game_text.update_score() 
-                        self.pipe_counted[i] = True
+        # Update pipes
+        for pipe in self.pipes:
+            pipe.update() 
 
-            # Update base sprite
-            self.base.update()
+        # Add a new pipe when one of the pipes has shifted off screen
+        if self.pipes[0].x < 0 and len(self.pipes) < 3:
+            self.pipes.append(Pipe(self.width+50, self.level))
+            self.pipe_counted.append(False)
 
-            # Update player sprite
-            self.player.update(spacebar_press)
+        # Remove pipe that has shifted left off screen
+        if self.pipes[0].x < -self.pipes[0].image.get_width():
+            self.pipes.pop(0)
+            self.pipe_counted.pop(0)
 
-            # Update pipes
-            for pipe in self.pipes:
-                pipe.update() 
+        # Update the game display
+        self.update_display(mode='drl')
+        next_state = self.process_frame_drl()
+        # If playing_game, then update display again.
 
-            # Add a new pipe when one of the pipes has shifted off screen
-            if self.pipes[0].x < 0 and len(self.pipes) < 3:
-                self.pipes.append(Pipe(self.width+50, self.level))
-                self.pipe_counted.append(False)
+        # Increment
+        self.clock.tick(self.fps)
 
-            # Remove pipe that has shifted left off screen
-            if self.pipes[0].x < -self.pipes[0].image.get_width():
-                self.pipes.pop(0)
-                self.pipe_counted.pop(0)
-
-            # Update the game display
-            self.update_display('main')
-
-            # Increment
-            self.clock.tick(self.fps)
-
-
-    def game_over(self):
-        """
-        The game over loop.
-        Display the player's final score and the "Game Over" message.
-        """
-        while True:
-            listen()
-            self.update_display('game_over')
-
-
-
-# Script entry point
-if __name__ == '__main__':
-    g = Game()
-    g.welcome_loop()
-    g.main_loop()
-    g.game_over()
+        return next_state, reward, done
