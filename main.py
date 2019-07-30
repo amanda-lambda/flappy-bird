@@ -19,12 +19,13 @@ from utils import *
 
 class Game():
 
-    def __init__(self, width=288, height=512):
+    def __init__(self, frame_size, width=288, height=512):
         """
         Initialize the game. 
         A minimal version for use training deep reinforcement learning methods. 
 
         Argument:
+            frame_size (int): width, height of extracted frame for DRL in pixels
             width (int): width of game screen in pixels
             height (int): height of game screen in pixels
         """
@@ -58,13 +59,18 @@ class Game():
         # Tell bird sprite the game has started.
         self.player.set_game_play_mode(True)
 
+        # Size of extracted frames for use in DRL training
+        self.frame_size = frame_size
+
 
     def update_display(self, mode='drl'):
         """
         Update the game display with the game background and sprites. 
 
         Args:
-            mode (str): One of ['drl' or 'game']. If 'dqn', then we would like to render a simplistic version. If 'game', then we would like to render the full version.
+            mode (str): One of ['drl' or 'game']. If 'dqn', then we would like 
+                to render a simplistic version. If 'game', then we would like to 
+                render the full version.
         """
         # Draw the background
         if mode == 'game':
@@ -99,7 +105,7 @@ class Game():
         state = state[:,:400]
 
         # Resize to 84x 84
-        state = cv2.resize(state, (84, 84))
+        state = cv2.resize(state, (self.frame_size, self.frame_size))
 
         # Convert to black and white
         state[state > 0] = 1
