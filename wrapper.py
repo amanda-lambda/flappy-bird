@@ -1,4 +1,5 @@
 import cv2
+import sys
 import random
 import numpy as np
 
@@ -8,13 +9,10 @@ from pygame.sprite import Sprite
 from pygame.surfarray import array2d
 
 # Import sprites
-from bird import Bird
-from pipe import Pipe
-from base import Base
-from game_text import GameText
+from . sprites import Bird, Pipe, GameText, Base
 
 # Import utility functions
-from utils import *
+from . utils import *
 
 
 class Game():
@@ -46,7 +44,7 @@ class Game():
         self.level = 2
 
         # Set up game objects
-        self.bg = pygame.image.load('assets/background.png').convert_alpha()
+        self.bg = pygame.image.load('game/assets/background.png').convert_alpha()
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
@@ -170,10 +168,41 @@ class Game():
 
         # Update the game display
         self.update_display(mode='drl')
-        next_state = self.process_frame_drl()
+        frame = self.process_frame_drl()
         # If playing_game, then update display again.
 
         # Increment
         self.clock.tick(self.fps)
 
-        return next_state, reward, done
+        return frame, reward, done
+
+
+def listen():
+    """
+    Listen and log key presses from user (spacebar, arrow keys). 
+    Will automatically exit game if it gets a quit signal.
+
+    Returns:
+        list (str): a list of the names of the keys pressed
+    """
+    keypress = []
+
+    for event in pygame.event.get():
+
+        # If spacebar is pressed
+        if event.type == KEYDOWN and event.key == K_SPACE:
+            keypress.append('spacebar')
+
+        # If arrows pressed
+        if event.type == KEYDOWN and event.key == K_RIGHT:
+            keypress.append('right_arrow')
+
+        if event.type == KEYDOWN and event.key == K_LEFT:
+            keypress.append('left_arrow')
+
+        # If quit triggered
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+    return keypress
