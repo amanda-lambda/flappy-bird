@@ -45,7 +45,7 @@ class Game():
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = [Pipe(self.width, self.level), Pipe(self.width*1.5, self.level)] 
+        self.pipes = [Pipe(self.width*0.5, self.level), Pipe(self.width, self.level)] 
 
         # List of flags indicating whether or not the pass through of the pipe 
         # pairs has been counted yet
@@ -132,7 +132,6 @@ class Game():
         if self.player.check_collide(obstacles):
             reward = -1
             done = True
-            print("I DIED")
 
         # If the player passes through a pipe, add +1 to score
         for i in range(len(self.pipes)):
@@ -169,6 +168,10 @@ class Game():
 
         # Increment
         self.clock.tick(self.fps)
+
+        # If the game ended, restart
+        if done:
+            self.__init__(self.frame_size)
 
         return frame, reward, done
 

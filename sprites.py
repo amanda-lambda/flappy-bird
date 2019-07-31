@@ -229,6 +229,8 @@ class Bird(Sprite):
         Returns:
             bool: True if collision with sprite instance, False otherwise
         """
+        if self.y < 0:
+            return True
         if isinstance(sprite, list):
             for s in sprite:
                 if pygame.sprite.collide_mask(self, s):
