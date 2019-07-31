@@ -1,5 +1,6 @@
 import cv2
 import sys
+import torch
 import random
 import numpy as np
 
@@ -8,11 +9,7 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 from pygame.surfarray import array2d
 
-# Import sprites
 from . sprites import Bird, Pipe, GameText, Base
-
-# Import utility functions
-from . utils import *
 
 
 class Game():
@@ -108,11 +105,10 @@ class Game():
         # Convert to black and white
         state[state > 0] = 1
 
-        # Convert torch tensor 
-        return state
+        return torch.tensor(state).float()
 
 
-    def step(self, action, num_frames):
+    def step(self, action):
         """
         Advances the game by one frame. 
 
@@ -121,12 +117,9 @@ class Game():
 
         Arguments:
             action (bool): If True, the bird flaps its wings once. If False, the bird does nothing.
-            num_frames (int): The number of frames to advance while repeating the action
 
         Returns:
-            next_state
-            reward
-            done
+            tensor, float, bool: 84x84 processed frame, reward, done status
         """
         reward = 0.1 
         done = False
