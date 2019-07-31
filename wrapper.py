@@ -70,6 +70,8 @@ class Game():
         # Draw the background
         if mode == 'game':
             self.screen.blit(self.bg, (0,0))
+        if mode == 'drl':
+            self.screen.fill(((0,0,0)))
 
         # Draw the sprites
         for pipe in self.pipes:
@@ -91,7 +93,7 @@ class Game():
         Process and clean the frame so we can input into the DRL function.
 
         Returns:
-            (tensor): 84x84x4 tensor 
+            (tensor): 1x84x84 tensor 
         """
         # Import game screen array
         state = np.array(array2d(self.screen), dtype='uint8')
@@ -105,7 +107,7 @@ class Game():
         # Convert to black and white
         state[state > 0] = 1
 
-        return torch.tensor(state).float()
+        return torch.tensor([state]).float()
 
 
     def step(self, action):
@@ -129,7 +131,8 @@ class Game():
         obstacles = self.pipes + [self.base]
         if self.player.check_collide(obstacles):
             reward = -1
-            done = False
+            done = True
+            print("I DIED")
 
         # If the player passes through a pipe, add +1 to score
         for i in range(len(self.pipes)):
