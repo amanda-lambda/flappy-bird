@@ -5,6 +5,22 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 
 
+# Load in all the sprites
+PIPE_LOWER = pygame.image.load('game/assets/pipe.png').convert_alpha()
+PIPE_UPPER = pygame.transform.rotate(PIPE_LOWER, 180)
+
+IM_UPFLAP = pygame.image.load('game/assets/bird_upflap.png').convert_alpha()
+IM_MIDFLAP = pygame.image.load('game/assets/bird_midflap.png').convert_alpha()
+IM_DOWNFLAP = pygame.image.load('game/assets/bird_downflap.png').convert_alpha()
+
+MSG_START = pygame.image.load('game/assets/start_msg.png').convert_alpha()
+MSG_END = pygame.image.load('game/assets/end_msg.png').convert_alpha()
+DIGITS = []
+for i in range(10):
+    DIGITS.append(pygame.image.load('game/assets/%i.png' % i).convert_alpha())
+
+BASE = pygame.image.load('game/assets/base.png').convert_alpha()
+
 class Pipe(Sprite):
 
     def __init__(self, x_init, difficulty):
@@ -33,10 +49,8 @@ class Pipe(Sprite):
             self.gap = 75
 
         # Sprite images
-        pipe_lower = pygame.image.load('game/assets/pipe.png').convert_alpha()
-        pipe_upper = pygame.transform.rotate(pipe_lower, 180)
-        pipe_width = pipe_lower.get_width()
-        pipe_height = pipe_lower.get_height()
+        pipe_width = PIPE_LOWER.get_width()
+        pipe_height = PIPE_LOWER.get_height()
 
         # Randomly generate coordinates for upper and lwer pipe
         midpoint = random.randrange(int(0.5*screen_height), 
@@ -48,8 +62,8 @@ class Pipe(Sprite):
         # Create surface and mask
         self.image = pygame.Surface((pipe_width, screen_height)).convert_alpha()
         self.image.fill((0, 0, 0, 0))
-        self.image.blit(pipe_lower, (0, y_lower))
-        self.image.blit(pipe_upper, (0, y_upper))
+        self.image.blit(PIPE_LOWER, (0, y_lower))
+        self.image.blit(PIPE_UPPER, (0, y_upper))
         self.mask = pygame.mask.from_surface(self.image)
 
 
@@ -110,22 +124,17 @@ class Bird(Sprite):
         self.velocity_flap = -9
         self.velocity_terminal = 10
 
-        # Sprite images
-        im_upflap = pygame.image.load('game/assets/bird_upflap.png').convert_alpha()
-        im_midflap = pygame.image.load('game/assets/bird_midflap.png').convert_alpha()
-        im_downflap = pygame.image.load('game/assets/bird_downflap.png').convert_alpha()
-
         # Sprite masks
-        mask_upflap = pygame.mask.from_surface(im_upflap)
-        mask_midflap = pygame.mask.from_surface(im_midflap)
-        mask_downflap = pygame.mask.from_surface(im_downflap)
+        mask_upflap = pygame.mask.from_surface(IM_UPFLAP)
+        mask_midflap = pygame.mask.from_surface(IM_MIDFLAP)
+        mask_downflap = pygame.mask.from_surface(IM_DOWNFLAP)
 
         # Oscillation state parameters
         self.osc_cycle = [0,1,2,3,4,5,6,7,8,7,6,5,4,3,2,1,0,
                           -1,-2,-3,-4,-5,-6,-7,-8,-7,-6,-5,-4,-3,-2,-1]
 
         # Flap state parameters
-        self.im_cycle = [im_upflap, im_midflap, im_downflap, im_midflap]
+        self.im_cycle = [IM_UPFLAP, IM_MIDFLAP, IM_DOWNFLAP, IM_MIDFLAP]
         self.mask_cycle = [mask_upflap, mask_midflap, mask_downflap, mask_midflap]
         self.image = self.im_cycle[self.count]
         self.mask = self.mask_cycle[self.count]
@@ -275,23 +284,15 @@ class GameText():
         # Game surface
         self.surface = pygame.display.get_surface() 
 
-        # Sprites
-        self.msg_start = pygame.image.load('game/assets/start_msg.png').convert_alpha()
-        self.msg_end = pygame.image.load('game/assets/end_msg.png').convert_alpha()
-        self.digits = []
-        for i in range(10):
-            self.digits.append(pygame.image.load('game/assets/%i.png' % i).convert_alpha())
-
         # Location of game_over message
-        self.x_msg_end = (self.surface.get_width() - self.msg_end.get_width()) / 2
+        self.x_msg_end = (self.surface.get_width() - MSG_END.get_width()) / 2
         self.y_msg_end = 0.3 * self.surface.get_height()
 
-        # Location of level selection digits. We want them to be evently spaced
-        # apart
+        # Location of level selection digits. Want event spacing.
         digit_gap = 50
-        x_level_1 = (self.surface.get_width() - self.digits[0].get_width()) / 2
-        x_level_0 = x_level_1 - digit_gap - self.digits[1].get_width()
-        x_level_2 = x_level_1 + digit_gap + self.digits[1].get_width()
+        x_level_1 = (self.surface.get_width() - DIGITS[0].get_width()) / 2
+        x_level_0 = x_level_1 - digit_gap - DIGITS[1].get_width()
+        x_level_2 = x_level_1 + digit_gap + DIGITS[1].get_width()
         self.x_level = [x_level_0, x_level_1, x_level_2]
         self.y_level = 0.7 * self.surface.get_height()
 
@@ -300,8 +301,8 @@ class GameText():
 
         # The currently selected level
         self.level = 1
-        self.level_box_height = self.digits[0].get_height() + 10
-        self.level_box_width = self.digits[0].get_width() + 10
+        self.level_box_height = DIGITS[0].get_height() + 10
+        self.level_box_width = DIGITS[0].get_width() + 10
 
         # Score value
         self.score = 0
@@ -320,14 +321,14 @@ class GameText():
         # In welcome mode, display the start instructions
         if mode == 'welcome':
             # Blit the welcome message
-            self.surface.blit(self.msg_start, (0, 0))
+            self.surface.blit(MSG_START, (0, 0))
             # Blit the green box highlighting the selected level
             pygame.draw.rect(self.surface, (0, 0, 0), 
                 (self.x_level[self.level]-5, self.y_level-5, self.level_box_width, self.level_box_height), 5)
             # Blit the levels
-            self.surface.blit(self.digits[0], (self.x_level[0], self.y_level))
-            self.surface.blit(self.digits[1], (self.x_level[1], self.y_level))
-            self.surface.blit(self.digits[2], (self.x_level[2], self.y_level))
+            self.surface.blit(DIGITS[0], (self.x_level[0], self.y_level))
+            self.surface.blit(DIGITS[1], (self.x_level[1], self.y_level))
+            self.surface.blit(DIGITS[2], (self.x_level[2], self.y_level))
 
         # In main mode, display the score
         if mode == 'main':
@@ -335,7 +336,7 @@ class GameText():
 
         # In game_over mode, display the end text and score
         if mode == 'game_over':
-            self.surface.blit(self.msg_end, (self.x_msg_end, self.y_msg_end))
+            self.surface.blit(MSG_END, (self.x_msg_end, self.y_msg_end))
             self.draw_score()
 
 
@@ -347,13 +348,13 @@ class GameText():
         score_digits = [int(i) for i in list(str(self.score))]
 
         # Find the total width (in pixels) of the score
-        score_width = sum([self.digits[i].get_width() for i in score_digits])
+        score_width = sum([DIGITS[i].get_width() for i in score_digits])
 
         # Blit the score digits onto the screen
         x = (self.surface.get_width() - score_width) / 2
         for i in score_digits:
-            self.surface.blit(self.digits[i], (x, self.y_score))
-            x += self.digits[i].get_width()
+            self.surface.blit(DIGITS[i], (x, self.y_score))
+            x += DIGITS[i].get_width()
 
 
     def update_level(self, keys_pressed):
@@ -400,13 +401,12 @@ class Base(Sprite):
         self.surface = pygame.display.get_surface() 
 
         # Sprite and mask
-        self.image = pygame.image.load('game/assets/base.png').convert_alpha()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(BASE)
         
         # Position 
         self.x = 0
-        self.y = self.surface.get_height() - self.image.get_height()
-        self.max_shift = self.image.get_width() - self.surface.get_width()
+        self.y = self.surface.get_height() - BASE.get_height()
+        self.max_shift = BASE.get_width() - self.surface.get_width()
 
 
     def update(self):
@@ -421,11 +421,11 @@ class Base(Sprite):
         """
         Draw the sprite to the game display.
         """
-        self.surface.blit(self.image, (self.x, self.y))
+        self.surface.blit(BASE, (self.x, self.y))
 
     @property
     def rect(self):
         """
         This property is needed for pygame.sprite.collide_mask
         """
-        return Rect(self.x, self.y, self.image.get_width(), self.image.get_height())
+        return Rect(self.x, self.y, BASE.get_width(), BASE.get_height())

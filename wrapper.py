@@ -9,7 +9,15 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 from pygame.surfarray import array2d
 
-from . sprites import Bird, Pipe, GameText, Base
+# To run in headless mode
+# https://www.pygame.org/wiki/HeadlessNoWindowsNeeded
+import os
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+# To tell pygame we don't need audio 
+# https://raspberrypi.stackexchange.com/questions/83254/pygame-and-alsa-lib-error
+os.environ['SDL_AUDIODRIVER'] = 'dsp'
+
 
 
 class Game():
@@ -36,6 +44,7 @@ class Game():
         self.width, self.height = width, height
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Flappy Bird')
+        from . sprites import Bird, Pipe, GameText, Base
 
         # Set game difficulty as [0,1,2] = [easy, medium, or hard]
         self.level = 2
@@ -45,7 +54,7 @@ class Game():
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = [Pipe(self.width*0.5, self.level), Pipe(self.width, self.level)] 
+        self.pipes = [Pipe(self.width*0.75, self.level), Pipe(self.width*1.25, self.level)] 
 
         # List of flags indicating whether or not the pass through of the pipe 
         # pairs has been counted yet
