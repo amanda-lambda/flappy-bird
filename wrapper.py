@@ -44,17 +44,18 @@ class Game():
         self.width, self.height = width, height
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Flappy Bird')
-        from . sprites import Bird, Pipe, GameText, Base
 
         # Set game difficulty as [0,1,2] = [easy, medium, or hard]
         self.level = 2
 
         # Set up game objects
+        from . sprites import Pipe, Bird, GameText, Base
         self.bg = pygame.image.load('game/assets/background.png').convert_alpha()
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
         self.pipes = [Pipe(self.width*0.75, self.level), Pipe(self.width*1.25, self.level)] 
+        self.pipe = Pipe
 
         # List of flags indicating whether or not the pass through of the pipe 
         # pairs has been counted yet
@@ -148,7 +149,7 @@ class Game():
                 if self.pipes[i].x < self.player.x:
                     self.game_text.update_score() 
                     self.pipe_counted[i] = True
-                    reward = 1
+                    reward = -1
 
         # Update base sprite
         self.base.update()
@@ -162,7 +163,7 @@ class Game():
 
         # Add a new pipe when one of the pipes has shifted off screen
         if self.pipes[0].x < 0 and len(self.pipes) < 3:
-            self.pipes.append(Pipe(self.width+50, self.level))
+            self.pipes.append(self.pipe(self.width+50, self.level))
             self.pipe_counted.append(False)
 
         # Remove pipe that has shifted left off screen

@@ -5,7 +5,9 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 
 
-# Load in all the sprites
+
+    # Load in all the sprites
+    # global PIPE_LOWER, PIPE_UPPER, IM_UPFLAP, IM_MIDFLAP, IM_DOWNFLAP, MSG_START, MSG_END, DIGITS, BASE
 PIPE_LOWER = pygame.image.load('game/assets/pipe.png').convert_alpha()
 PIPE_UPPER = pygame.transform.rotate(PIPE_LOWER, 180)
 
