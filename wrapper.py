@@ -9,6 +9,8 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 from pygame.surfarray import array2d
 
+import matplotlib.pyplot as plt
+
 # To run in headless mode
 # https://www.pygame.org/wiki/HeadlessNoWindowsNeeded
 import os
@@ -115,7 +117,8 @@ class Game():
         state = cv2.resize(state, (self.frame_size, self.frame_size))
 
         # Convert to black and white
-        state[state > 0] = 1
+        # state[state > 0] = 1
+        state = state/255.
 
         return torch.tensor([state]).float()
 
@@ -135,21 +138,6 @@ class Game():
         """
         reward = 0.1 
         done = False
-
-        # Check to see if the player bird has collided with any of the pipe
-        # pairs or the base. If so, exit the game loop.
-        obstacles = self.pipes + [self.base]
-        if self.player.check_collide(obstacles):
-            reward = -1
-            done = True
-
-        # If the player passes through a pipe, add +1 to score
-        for i in range(len(self.pipes)):
-            if not self.pipe_counted[i]:
-                if self.pipes[i].x < self.player.x:
-                    self.game_text.update_score() 
-                    self.pipe_counted[i] = True
-                    reward = -1
 
         # Update base sprite
         self.base.update()
@@ -174,7 +162,25 @@ class Game():
         # Update the game display
         self.update_display(mode='drl')
         frame = self.process_frame_drl()
+        # plt.clf()
+        # plt.imshow(frame.squeeze())
+        # plt.pause(0.01)
         # If playing_game, then update display again.
+
+        # Check to see if the player bird has collided with any of the pipe
+        # pairs or the base. If so, exit the game loop.
+        obstacles = self.pipes + [self.base]
+        if self.player.check_collide(obstacles):
+            reward = -5
+            done = True
+
+        # If the player passes through a pipe, add +1 to score
+        for i in range(len(self.pipes)):
+            if not self.pipe_counted[i]:
+                if self.pipes[i].x < self.player.x:
+                    self.game_text.update_score() 
+                    self.pipe_counted[i] = True
+                    reward = 1
 
         # Increment
         self.clock.tick(self.fps)

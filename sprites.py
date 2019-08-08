@@ -5,9 +5,8 @@ from pygame.locals import *
 from pygame.sprite import Sprite
 
 
-
-    # Load in all the sprites
-    # global PIPE_LOWER, PIPE_UPPER, IM_UPFLAP, IM_MIDFLAP, IM_DOWNFLAP, MSG_START, MSG_END, DIGITS, BASE
+# Load in all the sprites
+# global PIPE_LOWER, PIPE_UPPER, IM_UPFLAP, IM_MIDFLAP, IM_DOWNFLAP, MSG_START, MSG_END, DIGITS, BASE
 PIPE_LOWER = pygame.image.load('game/assets/pipe.png').convert_alpha()
 PIPE_UPPER = pygame.transform.rotate(PIPE_LOWER, 180)
 
@@ -22,6 +21,8 @@ for i in range(10):
     DIGITS.append(pygame.image.load('game/assets/%i.png' % i).convert_alpha())
 
 BASE = pygame.image.load('game/assets/base.png').convert_alpha()
+
+
 
 class Pipe(Sprite):
 
@@ -114,6 +115,7 @@ class Bird(Sprite):
         self.x = x_init
         self.y = y_init
         self.y_init = y_init
+        self.y_max = self.surface.get_height() - BASE.get_height()
 
         # Bird dynamics - angle of rotation
         self.angle = 0 
@@ -165,6 +167,12 @@ class Bird(Sprite):
             self.update_angle(key_press)
             self.update_velocity(key_press)
             self.y += self.velocity_y
+
+            # Correct y position so the bird cannot go "out of bounds"
+            if self.y > self.y_max:
+                self.y = self.y_max
+            if self.y < 0:
+                self.y = 0
 
         # Every 5 frames, update the player bird by changing the wing flap
         if self.count % 5 == 0:
