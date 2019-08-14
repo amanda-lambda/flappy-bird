@@ -37,7 +37,8 @@ class Game():
         pygame.init()
 
         # Frame rate of the game
-        self.fps = 30
+        # if drl_mode
+        self.fps = 1000
 
         # Game clock which ticks according to the game framerate
         self.clock = pygame.time.Clock()
@@ -56,7 +57,7 @@ class Game():
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = [Pipe(self.width*0.75, self.level), Pipe(self.width*1.25, self.level)] 
+        self.pipes = [Pipe(self.width, self.level), Pipe(self.width*1.5, self.level)] 
         self.pipe = Pipe
 
         # List of flags indicating whether or not the pass through of the pipe 
