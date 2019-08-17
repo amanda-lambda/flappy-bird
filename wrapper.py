@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 # To run in headless mode
 # https://www.pygame.org/wiki/HeadlessNoWindowsNeeded
 import os
-os.environ["SDL_VIDEODRIVER"] = "dummy"
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # To tell pygame we don't need audio 
 # https://raspberrypi.stackexchange.com/questions/83254/pygame-and-alsa-lib-error
@@ -38,7 +38,7 @@ class Game():
 
         # Frame rate of the game
         # if drl_mode
-        self.fps = 1000
+        self.fps = 100
 
         # Game clock which ticks according to the game framerate
         self.clock = pygame.time.Clock()
@@ -48,16 +48,13 @@ class Game():
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Flappy Bird')
 
-        # Set game difficulty as [0,1,2] = [easy, medium, or hard]
-        self.level = 2
-
         # Set up game objects
         from . sprites import Pipe, Bird, GameText, Base
         self.bg = pygame.image.load('game/assets/background.png').convert_alpha()
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = [Pipe(self.width, self.level), Pipe(self.width*1.5, self.level)] 
+        self.pipes = [Pipe(self.width), Pipe(self.width*1.5)] 
         self.pipe = Pipe
 
         # List of flags indicating whether or not the pass through of the pipe 
@@ -152,7 +149,7 @@ class Game():
 
         # Add a new pipe when one of the pipes has shifted off screen
         if self.pipes[0].x < 0 and len(self.pipes) < 3:
-            self.pipes.append(self.pipe(self.width+50, self.level))
+            self.pipes.append(self.pipe(self.width+50))
             self.pipe_counted.append(False)
 
         # Remove pipe that has shifted left off screen

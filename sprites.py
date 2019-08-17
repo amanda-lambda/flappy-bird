@@ -26,15 +26,13 @@ BASE = pygame.image.load('game/assets/base.png').convert_alpha()
 
 class Pipe(Sprite):
 
-    def __init__(self, x_init, difficulty):
+    def __init__(self, x_init):
         """
         Initialize a new pipe pair sprite instance. 
         The pipe placement on the y-axis is randomly generated.
 
         Arguments:
             x_init (int): x-coordinate of starting position 
-            difficulty (int): either 'easy', 'medium', or 'hard' = [0,1,2]. 
-                Will determine the size of the gaps between pipes.
         """
         # Game surface
         self.surface = pygame.display.get_surface()
@@ -44,12 +42,7 @@ class Pipe(Sprite):
         self.x = x_init
 
         # Size of gap between pipes (in pixels)
-        if difficulty == 0:
-            self.gap = 125
-        elif difficulty == 1:
-            self.gap = 100
-        elif difficulty == 2:
-            self.gap = 75
+        self.gap = 100
 
         # Sprite images
         pipe_width = PIPE_LOWER.get_width()
@@ -57,7 +50,7 @@ class Pipe(Sprite):
 
         # Randomly generate coordinates for upper and lwer pipe
         midpoint = random.randrange(int(0.5*screen_height), 
-                                    int(0.65*screen_height))
+                                    int(0.6*screen_height))
         y_upper = midpoint - pipe_height - self.gap/2
         y_lower = midpoint + self.gap/2
         self.y = y_upper
@@ -249,7 +242,7 @@ class Bird(Sprite):
             bool: True if collision with sprite instance, False otherwise
         """
         if self.y < 0:
-            return True
+            return True 
         if isinstance(sprite, list):
             for s in sprite:
                 if pygame.sprite.collide_mask(self, s):
