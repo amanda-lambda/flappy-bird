@@ -42,15 +42,15 @@ class Pipe(Sprite):
         self.x = x_init
 
         # Size of gap between pipes (in pixels)
-        self.gap = 100
+        self.gap = 120
 
         # Sprite images
         pipe_width = PIPE_LOWER.get_width()
         pipe_height = PIPE_LOWER.get_height()
 
         # Randomly generate coordinates for upper and lwer pipe
-        midpoint = random.randrange(int(0.5*screen_height), 
-                                    int(0.6*screen_height))
+        midpoint = random.randrange(int(0.55*screen_height), 
+                                    int(0.65*screen_height))
         y_upper = midpoint - pipe_height - self.gap/2
         y_lower = midpoint + self.gap/2
         self.y = y_upper
@@ -112,8 +112,8 @@ class Bird(Sprite):
 
         # Bird dynamics - angle of rotation
         self.angle = 0 
-        self.angle_threshold = 20
-        self.angle_flap = 45
+        self.angle_threshold = 0
+        self.angle_flap = 30
         self.rate_of_rotation = 3
 
         # Bird dynamics - velocity along the y axis
@@ -241,7 +241,7 @@ class Bird(Sprite):
         Returns:
             bool: True if collision with sprite instance, False otherwise
         """
-        if self.y < 0:
+        if self.y == 0:
             return True 
         if isinstance(sprite, list):
             for s in sprite:
@@ -300,7 +300,7 @@ class GameText():
         self.y_level = 0.7 * self.surface.get_height()
 
         # The location of the score
-        self.y_score = self.surface.get_height()*0.1
+        self.y_score = self.surface.get_height()*0.85
 
         # The currently selected level
         self.level = 1

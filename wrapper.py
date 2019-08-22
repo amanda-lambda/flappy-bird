@@ -54,7 +54,7 @@ class Game():
         self.game_text = GameText()
         self.player = Bird(0.2*width, 0.45*height)
         self.base = Base()
-        self.pipes = [Pipe(self.width), Pipe(self.width*1.5)] 
+        self.pipes = [Pipe(self.width), Pipe(self.width*1.6)] 
         self.pipe = Pipe
 
         # List of flags indicating whether or not the pass through of the pipe 
@@ -68,7 +68,7 @@ class Game():
         self.frame_size = frame_size
 
 
-    def update_display(self, mode='drl'):
+    def update_display(self):
         """
         Update the game display with the game background and sprites. 
 
@@ -78,21 +78,16 @@ class Game():
                 render the full version.
         """
         # Draw the background
-        if mode == 'game':
-            self.screen.blit(self.bg, (0,0))
-        if mode == 'drl':
-            self.screen.fill(((0,0,0)))
+        self.screen.fill(((0,0,0)))
 
         # Draw the sprites
         for pipe in self.pipes:
             pipe.draw()
         self.player.draw()
-        # if mode == 'game':
         self.base.draw()
 
         # Draw any messages
-        if mode == 'game':
-            self.game_text.draw('main')
+        self.game_text.draw('main')
 
         # Update the entire game display
         pygame.display.flip()
@@ -149,7 +144,7 @@ class Game():
 
         # Add a new pipe when one of the pipes has shifted off screen
         if self.pipes[0].x < 0 and len(self.pipes) < 3:
-            self.pipes.append(self.pipe(self.width+50))
+            self.pipes.append(self.pipe(1.2 * self.width))
             self.pipe_counted.append(False)
 
         # Remove pipe that has shifted left off screen
@@ -158,12 +153,8 @@ class Game():
             self.pipe_counted.pop(0)
 
         # Update the game display
-        self.update_display(mode='drl')
+        self.update_display()
         frame = self.process_frame_drl()
-        # plt.clf()
-        # plt.imshow(frame.squeeze())
-        # plt.pause(0.01)
-        # If playing_game, then update display again.
 
         # Check to see if the player bird has collided with any of the pipe
         # pairs or the base. If so, exit the game loop.
